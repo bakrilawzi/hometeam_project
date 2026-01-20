@@ -1,0 +1,29 @@
+{
+  "family": "hometeam-viewport-tracker",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::bakr:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "viewport",
+      "image": "bakr.dkr.ecr.us-east-1.amazonaws.com/hometeam-viewport:latest",
+      "essential": true,
+      "environment": [
+        {
+          "name": "PYTHONUNBUFFERED",
+          "value": "1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/hometeam-viewport",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

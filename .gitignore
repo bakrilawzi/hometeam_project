@@ -17,10 +17,15 @@ __pycache__/
 
 output/*
 !output/frames/
+!output/viewport
 output/frames/*
+output/viewport/*
 !output/frames/frame_000005.jpg
 !output/frames/frame_000010.jpg
 !output/frames/frame_000015.jpg
+!output/viewport/viewport_000005.jpg
+!output/viewport/viewport_000010.jpg
+!output/viewport/viewport_000015.jpg
 
 
 output/viewport/*
