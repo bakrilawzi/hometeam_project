@@ -71,7 +71,7 @@ class FrameReaderProcess(Process):
 
         finally:
             cap.release()
-            # Signal end of stream
+            
             try:
                 self.output_queue.put(None)
             except Exception:
@@ -80,7 +80,7 @@ class FrameReaderProcess(Process):
             elapsed = time.time() - start_time
             if elapsed > 0:
                 approx_out_fps = (max(0, frame_id // skip_interval)) / elapsed
-                print(f"FrameReaderProcess: Approx output FPS ~ {approx_out_fps:.2f}")
+                print(f"FrameReaderProcess: Approx output FPS ~: {approx_out_fps:.2f}")
 
             print("FrameReaderProcess: Finished reading frames")
 

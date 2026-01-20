@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+.venv/
+.env
+
+
+.DS_Store
+
+
+*.log
+
+
+output/*
+!output/frames/
+output/frames/*
+!output/frames/frame_000005.jpg
+!output/frames/frame_000010.jpg
+!output/frames/frame_000015.jpg
+
+
+output/viewport/*

@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  hometeam-viewport:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: hometeam-viewport
+
+    volumes:
+      - ./output:/app/output
+
+      - ./src/hometeamproj/config.ini:/app/src/hometeamproj/config.ini
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /app/src
+
+ 
+    command: python -m hometeamproj.main
+
+
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
