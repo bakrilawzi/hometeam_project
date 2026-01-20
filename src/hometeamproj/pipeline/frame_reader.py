@@ -4,14 +4,9 @@ import time
 import cv2
 from multiprocessing import Process
 import importlib.util
-from queue_manager import FrameData
+from hometeamproj.pipeline.queue_manager import FrameData , QueueManager
 from pathlib import Path
-path = Path("/Users/bakr/Desktop/HoemTeam Project /HOMETEAMPROJ/src/hometeamproj/config.py") 
-spec = importlib.util.spec_from_file_location("config", path) 
-module = importlib.util.module_from_spec(spec) 
-spec.loader.exec_module(module) 
-PipelineConfig = module.PipelineConfig
-
+from hometeamproj.config import PipelineConfig
 
 class FrameReaderProcess(Process):
     """Process that reads frames from video file and pushes FrameData into output_queue."""
@@ -54,31 +49,23 @@ class FrameReaderProcess(Process):
                     break
 
             
-                if frame_id % skip_interval != 0:
-                    frame_id += 1
-                    continue
-
-
-                frame = cv2.resize(
+                if frame_id % skip_interval == 0:
+                   frame = cv2.resize(
                     frame,
                     (self.config.frame_resize_width, self.config.frame_resize_height),
                     interpolation=cv2.INTER_AREA,
                 )
+                   timestamp = frame_id / video_fps
+
+                   frame_data = FrameData(frame_id=frame_id, frame=frame, timestamp=timestamp)
+                   try:
+                    self.output_queue.put(frame_data, timeout=self.config.queue_timeout)
+                   except Exception:
+                    pass
+                frame_id+=1
 
          
-                timestamp = frame_id / video_fps
-
-                frame_data = FrameData(frame_id=frame_id, frame=frame, timestamp=timestamp)
-
-             
-                try:
-                    self.output_queue.put(frame_data, timeout=self.config.queue_timeout)
-                except Exception:
-                  
-                    pass
-
-                frame_id += 1
-
+            
         except KeyboardInterrupt:
             print("FrameReaderProcess: Interrupted")
 
@@ -86,7 +73,7 @@ class FrameReaderProcess(Process):
             cap.release()
             # Signal end of stream
             try:
-                self.output_queue.put(None, timeout=self.config.queue_timeout)
+                self.output_queue.put(None)
             except Exception:
                 pass
 
@@ -99,33 +86,27 @@ class FrameReaderProcess(Process):
 
 
 
-if __name__ == "__main__":
-    import multiprocessing as mp
-    from pathlib import Path
+# if __name__ == "__main__":
+#     import multiprocessing as mp
+#     from pathlib import Path
 
 
-    cfg_path = Path("config.ini")
-    cfg = PipelineConfig.from_file(str(cfg_path)) if cfg_path.exists() else PipelineConfig.from_file("missing.ini")
+#     cfg_path = Path("config.ini")
+#     cfg = PipelineConfig.from_file(str(cfg_path)) if cfg_path.exists() else PipelineConfig.from_file("missing.ini")
+#     mp.get_start_method("spawn")
+#     q = mp.Queue(maxsize=cfg.queue_max_size)
 
-    q = mp.Queue(maxsize=cfg.queue_max_size)
+#     video_path = "/Users/bakr/Desktop/HoemTeam Project /HOMETEAMPROJ/src/hometeamproj/pipeline/sample_video_clip.mp4"  # adjust to your real path if needed
+#     p = FrameReaderProcess(input_video=video_path, output_queue=q, config=cfg)
 
-    video_path = "sample_video_clip.mp4"  # adjust to your real path if needed
-    p = FrameReaderProcess(input_video=video_path, output_queue=q, config=cfg)
-
-    
-    p.start()
+#     p.start()
 
 
-    count = 0
-    while True:
-        item = q.get()
-        if item is None:
-            print("Got sentinel. Done.")
-            break
-        print(f"Got frame_id={item.frame_id}, ts={item.timestamp:.3f}, shape={item.frame.shape}")
-        count += 1
-        if count >= 5:
-            break
-
-    p.terminate()
-    p.join()
+#     while True:
+#         item = q.get()
+#         if item is None:
+#             break
+#         print(item.frame_id)
+#         p.run()
+#     p.terminate()
+#     p.join()
